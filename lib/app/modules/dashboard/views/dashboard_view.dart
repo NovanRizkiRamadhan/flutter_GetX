@@ -8,24 +8,33 @@ import '../../../data/headline_response.dart';
 import '../../../data/technology_response.dart';
 import '../../../data/sports_response.dart';
 import '../../../data/entertainment_response.dart';
+import '../../home/views/home_view.dart';
 import '../controllers/dashboard_controller.dart';
 
+final auth = GetStorage();
+
 class DashboardView extends GetView<DashboardController> {
-  DashboardView({Key? key}) : super(key: key);
-
-  final authToken = GetStorage();
-
+  const DashboardView({Key? key}) : super(key: key);
   @override
   Widget build(BuildContext context) {
     DashboardController controller = Get.put(DashboardController());
     final ScrollController scrollController = ScrollController();
-
+    // Mendefinisikan sebuah widget bernama build dengan tipe StatelessWidget yang memerlukan BuildContext.
     return SafeArea(
       // Widget SafeArea menempatkan semua konten widget ke dalam area yang aman (safe area) dari layar.
       child: DefaultTabController(
         length: 4,
         // Widget DefaultTabController digunakan untuk mengatur tab di aplikasi.
         child: Scaffold(
+          floatingActionButton: FloatingActionButton(
+            onPressed: () async {
+              await auth.erase();
+              Get.offAll(() => const HomeView());
+            },
+            backgroundColor: Colors.redAccent,
+            child: const Icon(Icons.logout_rounded),
+          ),
+
           // Widget Scaffold digunakan sebagai struktur dasar aplikasi.
           appBar: PreferredSize(
             preferredSize: const Size.fromHeight(120.0),
@@ -41,9 +50,8 @@ class DashboardView extends GetView<DashboardController> {
                     // Properti textAlign digunakan untuk menentukan perataan teks.
                   ),
                   subtitle: Text(
-                    '${GetStorage().read('nama')}',
+                    auth.read('full_name').toString(),
                     textAlign: TextAlign.end,
-                    // Properti textAlign digunakan untuk menentukan perataan teks.
                   ),
                   trailing: Container(
                     // Widget Container digunakan untuk mengatur tampilan konten dalam kotak.
@@ -92,7 +100,7 @@ class DashboardView extends GetView<DashboardController> {
               headline(controller, scrollController),
               technology(controller, scrollController),
               sports(controller, scrollController),
-              entertainment(controller, scrollController)
+              entertainment(controller, scrollController),
             ],
           ),
         ),
@@ -101,6 +109,7 @@ class DashboardView extends GetView<DashboardController> {
   }
 }
 
+// Function untuk menampilkan daftar headline berita dalam bentuk ListView.Builder dengan menggunakan data yang didapatkan dari future yang dikembalikan oleh controller
 FutureBuilder<HeadlineResponse> headline(
     DashboardController controller, ScrollController scrollController) {
   return FutureBuilder<HeadlineResponse>(
